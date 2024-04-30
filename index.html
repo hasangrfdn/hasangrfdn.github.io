@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Zor Labirent Oyunu</title>
+<style>
+  canvas {
+    border: 1px solid #000;
+    background-color: #f0f0f0;
+  }
+</style>
+
+<table class="uyari">
+  <tr>
+    <td>Harita Hatalıysa sayfayı <strong>F5</strong> ile yenileyiniz.</td>
+  </tr>
+</table>
+
+</head>
+<body>
+
+<canvas id="index" width="1600" height="800"></canvas>
+<script>
+
+const canvas = document.getElementById('index');
+const ctx = canvas.getContext('2d');
+const tileBoyutu = 20; // Kare boyutu
+const labirentGenislik = canvas.width / tileBoyutu;
+const labirentYukseklik = canvas.height / tileBoyutu;
+
+// Arka plan resmini yüklemek için bir Image nesnesi oluşturun
+const arkaPlanResmi = new Image();
+arkaPlanResmi.src = 'bg.jpg'; 
+
+// Oyuncunun başlangıç pozisyonunu ayarla
+function resetOyuncu() {
+  return {
+    x: tileBoyutu / 2,
+    y: tileBoyutu / 2
+  };
+}
+
+let oyuncu = resetOyuncu();
+
+// Labirentin haritası (0: yol, 1: duvar)
+let labirentHaritasi = [];
+for(let y = 0; y < labirentYukseklik; y++) {
+  labirentHaritasi[y] = [];
+  for(let x = 0; x < labirentGenislik; x++) {
+    labirentHaritasi[y][x] = Math.random() > 0.8 ? 1 : 0; // Rastgele engeller oluştur
+  }
+}
+labirentHaritasi[0][0] = 0; // Başlangıcı temizle
+labirentHaritasi[labirentYukseklik - 1][labirentGenislik - 1] = 0; // Bitişi temizle
+
+// Klavye tuşlarına basıldığında çalışacak event listener'ı ekle
+document.addEventListener('keydown', keyDownHandler, false);
+
+// Klavye tuşlarına basıldığında çalışacak fonksiyon
+function keyDownHandler(event) {
+    let newX = oyuncu.x;
+    let newY = oyuncu.y;
+
+    if(event.key == "Right" || event.key == "ArrowRight") {
+        newX += tileBoyutu; // Sağa hareket
+    }
+    else if(event.key == "Left" || event.key == "ArrowLeft") {
+        newX -= tileBoyutu; // Sola hareket
+    }
+    else if(event.key == "Up" || event.key == "ArrowUp") {
+        newY -= tileBoyutu; // Yukarı hareket
+    }
+    else if(event.key == "Down" || event.key == "ArrowDown") {
+        newY += tileBoyutu; // Aşağı hareket
+    }
+
+    // Oyuncunun labirent içinde kalmasını sağlayacak sınırlamaları buraya ekleyin
+    newX = Math.max(tileBoyutu / 2, Math.min(newX, canvas.width - tileBoyutu / 2));
+    newY = Math.max(tileBoyutu / 2, Math.min(newY, canvas.height - tileBoyutu / 2));
+
+    // Labirentin duvarlarına çarpmayı kontrol et ve hedefe ulaşıp ulaşmadığını kontrol et
+    const gridX = Math.floor(newX / tileBoyutu);
+    const gridY = Math.floor(newY / tileBoyutu);
+    if(labirentHaritasi[gridY][gridX] === 0) {
+        oyuncu.x = newX;
+        oyuncu.y = newY;
+        checkHedef(); // Hedefe ulaşıp ulaşmadığını kontrol et
+    } else {
+        alert('Duvara çarptınız, yeniden başlayın!');
+        oyuncu = resetOyuncu(); // Oyuncuyu başlangıç konumuna sıfırla
+    }
+
+    ciz();
+}
+
+// Hedefe ulaşıp ulaşmadığını kontrol et
+function checkHedef() {
+  const hedefX = labirentGenislik - 1;
+  const hedefY = labirentYukseklik - 1;
+  const gridX = Math.floor(oyuncu.x / tileBoyutu);
+  const gridY = Math.floor(oyuncu.y / tileBoyutu);
+
+  if(gridX === hedefX && gridY === hedefY) {
+    alert('Hedefe ulaştınız, tebrikler!');
+    oyuncu = resetOyuncu(); // Oyunu yeniden başlat
+  }
+}
+
+// Oyunu çizdir
+function ciz() {
+  // Arka plan resmini çiz
+  ctx.drawImage(arkaPlanResmi, 0, 0, canvas.width, canvas.height);
+
+  // Labirenti çiz
+  for(let y = 0; y < labirentYukseklik; y++) {
+    for(let x = 0; x < labirentGenislik; x++) {
+      if (labirentHaritasi[y][x] === 1) {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(x * tileBoyutu, y * tileBoyutu, tileBoyutu, tileBoyutu);
+      }
+    }
+  }
+
+  // Oyuncuyu ve hedefi çiz
+  oyuncuyuCiz();
+  hedefCiz();
+}
+
+// Oyuncuyu çizdir
+function oyuncuyuCiz() {
+  ctx.fillStyle = 'red';
+  ctx.beginPath();
+  ctx.arc(oyuncu.x, oyuncu.y, tileBoyutu / 2, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// Hedefi çizdir
+function hedefCiz() {
+  const hedefX = labirentGenislik - 1;
+  const hedefY = labirentYukseklik - 1;
+  ctx.fillStyle = 'green';
+  ctx.fillRect(hedefX * tileBoyutu, hedefY * tileBoyutu, tileBoyutu, tileBoyutu);
+}
+
+// Arka plan resmi yüklendiğinde oyunu çizdir
+arkaPlanResmi.onload = function() {
+  ciz();
+};
+
+
+</script>
+</body>
+</html>
