@@ -14,3 +14,5 @@ hedefe ulaşınca çıkan görsel
 
 
 Oyun Nasıl Oynanır: Klavyede bulunan yön tuşları yardımıyla kendinizi istediğiniz yere yönlendirebilirsiniz. Dikkatli olun duvara çarpmayın.
+
+oynanış ve oyun hakkında bilgi edinmek için youtube videom https://www.youtube.com/watch?v=HfcyMCEd8pk&t=2
